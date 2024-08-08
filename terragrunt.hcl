@@ -1,11 +1,15 @@
-include {
-  path = find_in_parent_folders()
-}
-
-terraform {
-  source = "git::https://github.com/Smartbrood/terraform-aws-s3-bucket.git"
-}
-inputs = {
-    bucket = "project-dev-sts"
-    create_bucket = true
+generate "backend" {
+  path      = "backend.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = <<EOF
+      terraform {
+        backend "s3" {
+        bucket         = "dev-state-management"
+        key            = "project_dev/${path_relative_to_include()}/terraform.tfstate"
+        region         = "ap-southeast-1"
+        dynamodb_table = "dev-state-management"
+        acl            = "bucket-owner-full-control"
+      }
+    }
+  EOF   
 }
